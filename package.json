@@ -1,0 +1,13 @@
+{
+  "name": "yardguard-secure",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node generate-config.js && http-server public",
+    "build": "node generate-config.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
+    "dotenv": "^16.6.1",
+    "http-server": "^14.1.1"
+  }
+}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YardGuard Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Config MUST be loaded first -->
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="brand">YardGuard Admin</div>
+        <nav>
+            <a href="index.html" class="active">Queue</a>
+            <!-- Only shown to admins via JS logic -->
+            <a href="audit.html" id="nav-audit" style="display:none;">Audit Log</a>
+            <a href="users.html" id="nav-users" style="display:none;">Users</a>
+            <a href="#" id="logout-btn">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="card">
+            <div class="flex-header"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0;">Lead Queue</h2>
+                <div class="filters" style="display: flex; align-items: center;">
+                    <select id="status-filter" style="width: 200px;">
+                        <option value="ALL">All Statuses</option>
+                        <option value="NEW">New</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="NEEDS_REVIEW" selected>Needs Review</option>
+                        <option value="APPROVED">Approved</option>
+                        <option value="REJECTED">Rejected</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="FAILED">Failed</option>
+                    </select>
+                    <button id="refresh-btn" class="btn btn-primary" style="margin-left: 12px;">Refresh</button>
+                    <!-- Admin Only Action -->
+                    <button id="reset-db-btn" class="btn"
+                        style="margin-left: 12px; background-color: #ef4444; color: white; border: none; cursor: pointer; display:none;">Reset
+                        DB</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="leads-table">
+                    <thead>
+                        <tr>
+                            <th>Created</th>
+                            <th>Lead</th>
+                            <th>Photos</th>
+                            <th>Status</th>
+                            <th>Last Update</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leads-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" style="display: flex; justify-content: center; margin-top: 24px;">
+                <button id="prev-page" class="btn" disabled>Previous</button>
+                <span id="page-info" style="margin: 0 16px; line-height: 32px;">Page 1</span>
+                <button id="next-page" class="btn">Next</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { checkAuth, logout, supabase } from './js/auth.js';
+        // Import dashboard logic (We need to refactor dashboard.js to export functions or run on init)
+        // For now, we will load it as a side-effect module after auth check.
+
+        // 1. Check Auth immediately
+        const user = await checkAuth();
+        if (user) {
+            console.log("Welcome,", user.email);
+
+            // Show Admin Elements
+            document.getElementById('nav-audit').style.display = 'inline';
+            document.getElementById('nav-users').style.display = 'inline';
+            document.getElementById('reset-db-btn').style.display = 'inline';
+
+            // Load Dashboard Logic dynamically to prevent it from running before auth
+            const { initDashboard } = await import(`./js/dashboard.js?v=${Date.now()}`);
+            initDashboard();
+        }
+
+        // Logout Handler
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+
+        // Reset Handler (Secure)
+        document.getElementById('reset-db-btn').addEventListener('click', async () => {
+            if (!confirm('WARNING: DELETE ALL LEADS? This cannot be undone.')) return;
+
+            const btn = document.getElementById('reset-db-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "Resetting...";
+            btn.disabled = true;
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+
+                // Call Function with Auth Header
+                const response = await fetch(`${window.YardGuardConfig.SUPABASE_URL}/functions/v1/admin-reset`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error(await response.text());
+
+                alert('Database Reset Successful');
+                window.location.reload();
+
+            } catch (err) {
+                console.error("Reset Failed:", err);
+                alert("Reset Failed: " + err.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

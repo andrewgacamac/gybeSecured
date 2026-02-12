@@ -21,3 +21,5 @@ Thumbs.db
 # Supabase
 supabase/functions/_shared/deno.d.ts
 public/js/config.js
+# Security
+security/

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Details - YardGuard Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Config -->
+    <script src="js/config.js"></script>
+
+    <!-- Modal CSS -->
+    <style>
+        /* Simple Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 4px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .rejection-box {
+            background-color: #ffebe9;
+            border: 1px solid #cf222e;
+            color: #cf222e;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        /* Lead Info Grid */
+        .lead-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .lead-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-group {
+            margin-bottom: 12px;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #57606a;
+            font-size: 13px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            color: #1f2328;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .photos-grid div {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .photo-meta {
+            padding: 8px;
+            font-size: 11px;
+            color: #57606a;
+            background: #f6f8fa;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="brand">YardGuard Admin</div>
+        <nav>
+            <a href="index.html" style="text-decoration: none; font-weight: bold;">&larr; Dashboard</a>
+            <span style="color: #ccc; margin: 0 8px;">|</span>
+            <span id="lead-status-badge"></span>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container" style="max-width: 1000px; margin: 0 auto;">
+
+            <!-- Back Button (Redundant but requested) -->
+            <a href="index.html" class="btn"
+                style="display: inline-block; margin-bottom: 16px; background-color: #0969da; color: white; border: none; padding: 8px 16px; border-radius: 6px; text-decoration: none;">
+                &larr; Back to Dashboard
+            </a>
+
+            <div id="rejection-box" class="rejection-box">
+                <strong>Lead Rejected:</strong> <span id="rejection-reason"></span>
+            </div>
+
+            <!-- Header Card -->
+            <div class="card" style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h1 id="lead-name" style="margin: 0 0 8px 0;">Loading...</h1>
+                        <div style="display: flex; gap: 16px; color: #57606a;">
+                            <span id="lead-email"></span>
+                            <span id="lead-phone"></span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="info-label">Created</div>
+                        <div id="lead-created">-</div>
+
+                        <div class="info-label" style="margin-top: 8px;">Retry Count</div>
+                        <div id="lead-retry">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lead-grid">
+                <!-- Left Column: Details -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+
+                    <!-- Property Details -->
+                    <div class="card">
+                        <h3>Property Details</h3>
+                        <div class="info-group">
+                            <div class="info-label">Address</div>
+                            <div class="info-value" id="lead-address">-</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">City / Postal</div>
+                            <div class="info-value" id="lead-city-postal">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Project Specs -->
+                    <div class="card">
+                        <h3>Project Specifications</h3>
+                        <div class="info-group">
+                            <div class="info-label">Package Interest</div>
+                            <div class="info-value" id="lead-package">-</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Approx Size</div>
+                            <div class="info-value" id="lead-size">-</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Project Type</div>
+                            <div class="info-value" id="lead-type">-</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Timeline</div>
+                            <div class="info-value" id="lead-timeline">-</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Referral Source</div>
+                            <div class="info-value" id="lead-source">-</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Customer Message</div>
+                            <div class="info-value" id="lead-message" style="white-space: pre-wrap;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Estimate & Actions -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+
+                    <!-- AI Estimate Section -->
+                    <div class="card" style="border-top: 4px solid var(--primary);">
+                        <h3>AI Estimate & Proposal</h3>
+                        <p style="font-size: 13px; color: #666; margin-bottom: 12px;">
+                            Review and edit the AI-generated estimate below before approving. This text will be sent to
+                            the customer.
+                        </p>
+                        <textarea id="estimate-text" class="form-control" rows="12"
+                            placeholder="Waiting for AI Estimate..."></textarea>
+                        <div style="margin-top: 12px; text-align: right;">
+                            <button id="save-estimate-btn" class="btn">Save Estimate</button>
+                        </div>
+                    </div>
+
+                    <!-- Internal Notes -->
+                    <div class="card">
+                        <h3>Internal Notes</h3>
+                        <textarea id="internal-notes" class="form-control" rows="4"
+                            placeholder="Add internal notes here..."></textarea>
+                        <div style="margin-top: 12px; text-align: right;">
+                            <button id="save-notes-btn" class="btn">Save Notes</button>
+                        </div>
+                    </div>
+
+                    <!-- Approvals -->
+                    <div class="card" id="actions-container">
+                        <h3>Actions</h3>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button id="approve-btn" class="btn btn-primary" style="flex: 1;">Approve & Send
+                                Email</button>
+                            <button id="resend-btn" class="btn" style="flex: 1; display: none;">Resend Email</button>
+                            <button id="reject-btn" class="btn"
+                                style="background-color: #fff; border: 1px solid #d0d7de; color: #cf222e;">Reject</button>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <div style="margin-bottom: 8px;">
+                                <label for="ai-prompt-input"
+                                    style="font-size: 11px; font-weight: bold; color: #57606a;">Custom AI
+                                    Prompt:</label>
+                                <textarea id="ai-prompt-input"
+                                    style="width: 100%; height: 60px; font-size: 13px; padding: 8px; border: 1px solid #d0d7de; border-radius: 4px; resize: vertical; margin-top: 4px; font-family: sans-serif;"
+                                    placeholder="e.g. Make the grass darker green..."></textarea>
+                            </div>
+                            <button id="regenerate-btn" class="btn"
+                                style="width: 100%; background-color: #f6f8fa; color: #24292f; border: 1px solid #d0d7de; cursor: pointer; margin-bottom: 8px;">
+                                <i class="fas fa-magic"></i> Regenerate AI Images
+                            </button>
+                        </div>
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #eaeef2;">
+                            <button id="delete-lead-btn" class="btn"
+                                style="width: 100%; background-color: #feebe9; color: #cf222e; border: 1px solid #cf222e; cursor: pointer;">Delete
+                                Lead Permanently</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Photos Section -->
+            <div class="card">
+                <h3>Site Photos</h3>
+                <div id="photos-container" class="photos-grid">
+                    <!-- Photos injected here -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Reject Modal -->
+    <div id="reject-modal"
+        style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+        <div class="card" style="width: 400px; max-width: 90%;">
+            <h3>Reject Lead</h3>
+            <p>Please provide a reason for rejection (internal record only):</p>
+            <textarea id="reject-reason-input" class="form-control" rows="3"
+                placeholder="e.g. Invalid request, Out of service area..."></textarea>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button id="cancel-reject" class="btn">Cancel</button>
+                <button id="confirm-reject" class="btn"
+                    style="background-color: #cf222e; color: white; border: none;">Confirm Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="img-modal" class="modal">
+        <span class="modal-close">&times;</span>
+        <img class="modal-content" id="modal-img-content">
+    </div>
+
+    <!-- MAIN LOGIC (SECURE) -->
+    <script type="module" src="js/lead-detail-v2.js?v=2"></script>
+</body>
+
+</html>

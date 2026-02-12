@@ -1,0 +1,2 @@
+[functions.cleanup-job]
+schedule = "0 3 * * *"

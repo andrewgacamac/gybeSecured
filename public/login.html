@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YardGuard Admin Login</title>
+    <!-- Config MUST be loaded first -->
+    <script src="js/config.js"></script>
+    <style>
+        :root {
+            --primary: #1a7f37;
+            --surface: #ffffff;
+            --background: #f6f8fa;
+            --text: #1f2328;
+            --danger: #cf222e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #146c2e;
+        }
+
+        #error-msg {
+            color: var(--danger);
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary); margin-top:0;">YardGuard Admin</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="admin@yardguard.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
+            </form>
+            <div id="error-msg"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './js/auth.js';
+
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMsg = document.getElementById('error-msg');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginBtn.disabled = true;
+            loginBtn.innerText = 'Signing In...';
+            errorMsg.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // 1. Authenticate with Supabase
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                console.log("Logged in as:", data.user.email);
+
+                // 2. Verify Admin Role (RLS Check)
+                // We attempt to read the 'admin_users' table. 
+                // If RLS blocks us or we are not in it, this will fail or return null.
+                const { data: profile, error: profileError } = await supabase
+                    .from('admin_users')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .maybeSingle();
+
+                if (profileError) {
+                    throw new Error("Database error verifying role.");
+                }
+
+                if (!profile || profile.role !== 'admin') {
+                    // Not authorized!
+                    await supabase.auth.signOut();
+                    throw new Error("Access Denied: You are not an Admin.");
+                }
+
+                // 3. Success -> Redirect
+                window.location.href = 'index.html';
+
+            } catch (err) {
+                console.error("Login Failed:", err);
+                errorMsg.innerText = err.message || "Login failed. Please check credentials.";
+                errorMsg.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.innerText = 'Sign In';
+            }
+        });
+    </script>
+</body>
+
+</html>

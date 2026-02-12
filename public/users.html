@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YardGuard - Users</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="brand">YardGuard Admin</div>
+        <nav>
+            <a href="index.html">Queue</a>
+            <a href="audit.html" class="admin-only">Audit Log</a>
+            <a href="users.html" class="admin-only active">Users</a>
+            <a href="#" id="logout-btn">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2>Admin Users</h2>
+                <button id="invite-btn" class="btn btn-primary">Invite User</button>
+            </div>
+
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-body">
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Invite Modal -->
+    <div id="invite-modal" class="modal">
+        <div class="card" style="width: 400px; margin: auto; position: relative;">
+            <span class="modal-close"
+                style="position: absolute; top: 10px; right: 10px; font-size: 24px;">&times;</span>
+            <h3>Invite Admin User</h3>
+            <form id="invite-form">
+                <div class="form-group">
+                    <label for="invite-email">Email Address</label>
+                    <input type="email" id="invite-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="invite-role">Role</label>
+                    <select id="invite-role">
+                        <option value="reviewer">Reviewer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Send Invite</button>
+            </form>
+            <div id="invite-msg" style="margin-top: 12px; font-size: 14px;"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/users.js"></script>
+</body>
+
+</html>
