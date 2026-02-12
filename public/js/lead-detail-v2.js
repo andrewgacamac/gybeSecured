@@ -157,26 +157,25 @@ function renderLead(lead) {
             resendBtn.style.display = 'none';
         }
     }
-}
 
-// Pre-populate Prompt
-const promptInput = document.getElementById('ai-prompt-input');
-if (promptInput) {
-    let defaultPrompt = "fresh artificial turf";
-    if (lead.package_interest) {
-        const interest = lead.package_interest.toLowerCase();
-        if (interest.includes('pawguard')) {
-            defaultPrompt = "durable, pet-friendly artificial turf, short pile height, slightly reinforced";
-        } else if (interest.includes('augusta') || interest.includes('golf')) {
-            defaultPrompt = "professional putting green turf, very short and smooth, with a slightly longer fringe grass border";
-        } else if (interest.includes('premium')) {
-            defaultPrompt = "high-end luxury artificial turf, dense and lush, perfectly manicured";
-        } else if (interest.includes('easy')) {
-            defaultPrompt = "maintenance-free, natural-looking artificial turf, medium pile height";
+    // Pre-populate Prompt
+    const promptInput = document.getElementById('ai-prompt-input');
+    if (promptInput) {
+        let defaultPrompt = "fresh artificial turf";
+        if (lead.package_interest) {
+            const interest = lead.package_interest.toLowerCase();
+            if (interest.includes('pawguard')) {
+                defaultPrompt = "durable, pet-friendly artificial turf, short pile height, slightly reinforced";
+            } else if (interest.includes('augusta') || interest.includes('golf')) {
+                defaultPrompt = "professional putting green turf, very short and smooth, with a slightly longer fringe grass border";
+            } else if (interest.includes('premium')) {
+                defaultPrompt = "high-end luxury artificial turf, dense and lush, perfectly manicured";
+            } else if (interest.includes('easy')) {
+                defaultPrompt = "maintenance-free, natural-looking artificial turf, medium pile height";
+            }
         }
+        promptInput.value = defaultPrompt;
     }
-    promptInput.value = defaultPrompt;
-}
 }
 
 async function loadPhotos() {
