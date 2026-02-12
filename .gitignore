@@ -20,6 +20,6 @@ Thumbs.db
 
 # Supabase
 supabase/functions/_shared/deno.d.ts
-public/js/config.js
+# public/js/config.js (Safe to commit if only anon key)
 # Security
 security/
